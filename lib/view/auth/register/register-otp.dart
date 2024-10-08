@@ -10,9 +10,88 @@ class RegisterOTP extends StatefulWidget {
 
 class _RegisterOTPState extends State<RegisterOTP> {
   final TextEditingController _otpController = TextEditingController();
+  bool _isLoading = false;
+
+  // Method to build OTP input field
+  Widget _buildOtpInput() {
+    return TextField(
+      controller: _otpController,
+      decoration: InputDecoration(
+        labelText: 'Kode OTP',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+        ),
+      ),
+      keyboardType: TextInputType.number,
+    );
+  }
+
+  // Method to build Submit button
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: _isLoading
+          ? null
+          : () async {
+              String otp = _otpController.text;
+
+              // Simulate loading state
+              setState(() {
+                _isLoading = true;
+              });
+
+              await Future.delayed(const Duration(seconds: 2)); // Simulated OTP verification delay
+
+              // Simulate OTP verification (replace this with actual verification logic)
+              if (otp == '123456') { // Example OTP check
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegisterForm()),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('OTP tidak valid!')),
+                );
+              }
+
+              setState(() {
+                _isLoading = false;
+              });
+            },
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 50), // Full width button
+      ),
+      child: _isLoading
+          ? const CircularProgressIndicator(
+              color: Colors.white,
+            )
+          : const Text('Verifikasi OTP'),
+    );
+  }
+
+  // Method to build Resend OTP prompt
+  Widget _buildResendOtpText() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Belum menerima kode? '),
+        TextButton(
+          onPressed: () {
+            // Implement resend OTP functionality here
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('OTP telah dikirim ulang!')),
+            );
+            print('Resend OTP');
+          },
+          child: const Text('Kirim Ulang'),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Masukkan Kode OTP'), // App bar title
@@ -31,59 +110,15 @@ class _RegisterOTPState extends State<RegisterOTP> {
             const SizedBox(height: 20), // Space after the text
 
             // OTP input field
-            TextField(
-              controller: _otpController,
-              decoration: InputDecoration(
-                labelText: 'Kode OTP',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12), // Rounded corners
-                ),
-              ),
-              keyboardType: TextInputType.number,
-            ),
+            _buildOtpInput(),
             const SizedBox(height: 20), // Space after input
 
             // Submit button
-            ElevatedButton(
-              onPressed: () {
-                // Implement OTP verification functionality here
-                String otp = _otpController.text;
-                print('OTP: $otp');
-
-                // Simulate OTP verification (you should replace this with actual verification logic)
-                if (otp == '123456') { // Example OTP check
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegisterForm()),
-                  );
-                } else {
-                  // Show an error message if OTP is incorrect
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('OTP tidak valid!')),
-                  );
-                }
-              },
-              child: const Text('Verifikasi OTP'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50), // Full width button
-              ),
-            ),
+            _buildSubmitButton(),
             const SizedBox(height: 20), // Space before resending prompt
 
             // Resend OTP prompt
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Belum menerima kode? '),
-                TextButton(
-                  onPressed: () {
-                    // Implement resend OTP functionality here
-                    print('Resend OTP');
-                  },
-                  child: const Text('Kirim Ulang'),
-                ),
-              ],
-            ),
+            _buildResendOtpText(),
           ],
         ),
       ),

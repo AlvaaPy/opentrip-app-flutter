@@ -14,6 +14,101 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _whatsappController = TextEditingController();
   String? _gender; // To store selected gender
 
+  // Method to build input field
+  Widget _buildTextInput({
+    required String label,
+    required TextEditingController controller,
+    TextInputType inputType = TextInputType.text,
+    void Function()? onTap,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      keyboardType: inputType,
+      onTap: onTap,
+    );
+  }
+
+  // Method to build gender selection row
+  Widget _buildGenderSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Jenis Kelamin'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Row(
+              children: [
+                Radio<String>(
+                  value: 'Laki-laki',
+                  groupValue: _gender,
+                  onChanged: (value) {
+                    setState(() {
+                      _gender = value;
+                    });
+                  },
+                ),
+                const Text('Laki-laki'),
+              ],
+            ),
+            Row(
+              children: [
+                Radio<String>(
+                  value: 'Perempuan',
+                  groupValue: _gender,
+                  onChanged: (value) {
+                    setState(() {
+                      _gender = value;
+                    });
+                  },
+                ),
+                const Text('Perempuan'),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Method to build submit button
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: () {
+        String fullName = _fullNameController.text;
+        String dob = _dobController.text;
+        String gender = _gender ?? 'Belum dipilih';
+        String whatsapp = _whatsappController.text;
+
+        if (fullName.isEmpty || dob.isEmpty || gender.isEmpty || whatsapp.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Semua field harus diisi!')),
+          );
+          return;
+        }
+
+        print('Full Name: $fullName');
+        print('Date of Birth: $dob');
+        print('Gender: $gender');
+        print('WhatsApp: $whatsapp');
+
+        // Navigate to the Home screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const Home()),
+        );
+      },
+      child: const Text('Setuju dan Lanjutkan'),
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 50), // Full width button
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,26 +127,19 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               const SizedBox(height: 20),
 
-              // Input field for full name
-              TextField(
+              // Full name input
+              _buildTextInput(
+                label: 'Nama Lengkap',
                 controller: _fullNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Lengkap',
-                  border: OutlineInputBorder(),
-                ),
               ),
-              const SizedBox(height: 16), // Space between fields
+              const SizedBox(height: 16),
 
-              // Input field for date of birth
-              TextField(
+              // Date of birth input
+              _buildTextInput(
+                label: 'Tanggal Lahir',
                 controller: _dobController,
-                decoration: const InputDecoration(
-                  labelText: 'Tanggal Lahir',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.datetime,
+                inputType: TextInputType.datetime,
                 onTap: () async {
-                  // Show date picker when the field is tapped
                   DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
@@ -59,92 +147,32 @@ class _RegisterFormState extends State<RegisterForm> {
                     lastDate: DateTime.now(),
                   );
                   if (pickedDate != null) {
-                    _dobController.text = "${pickedDate.toLocal()}".split(' ')[0]; // Format date
+                    _dobController.text = "${pickedDate.toLocal()}".split(' ')[0];
                   }
                 },
               ),
-              const SizedBox(height: 16), // Space between fields
+              const SizedBox(height: 16),
 
               // Gender selection
-              const Text('Jenis Kelamin'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Row(
-                    children: [
-                      Radio<String>(
-                        value: 'Laki-laki',
-                        groupValue: _gender,
-                        onChanged: (value) {
-                          setState(() {
-                            _gender = value;
-                          });
-                        },
-                      ),
-                      const Text('Laki-laki'),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Radio<String>(
-                        value: 'Perempuan',
-                        groupValue: _gender,
-                        onChanged: (value) {
-                          setState(() {
-                            _gender = value;
-                          });
-                        },
-                      ),
-                      const Text('Perempuan'),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16), // Space between fields
+              _buildGenderSelection(),
+              const SizedBox(height: 16),
 
-              // Input field for WhatsApp number
-              TextField(
+              // WhatsApp number input
+              _buildTextInput(
+                label: 'Nomor WhatsApp',
                 controller: _whatsappController,
-                decoration: const InputDecoration(
-                  labelText: 'Nomor WhatsApp',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.phone,
+                inputType: TextInputType.phone,
               ),
-              const SizedBox(height: 20), // Space before agreement text
+              const SizedBox(height: 20),
 
-              // Agreement text
               const Text(
                 'Dengan memilih Setuju dan Lanjutkan, saya menyetujui Syarat dan Ketentuan dan Kebijakan Privasi dari Permata Wisata.',
                 style: TextStyle(fontSize: 14),
               ),
-              const SizedBox(height: 20), // Space before button
+              const SizedBox(height: 20),
 
-              // Agree and continue button
-              ElevatedButton(
-                onPressed: () {
-                  // Handle the registration process
-                  String fullName = _fullNameController.text;
-                  String dob = _dobController.text;
-                  String gender = _gender ?? 'Belum dipilih'; // Default if not selected
-                  String whatsapp = _whatsappController.text;
-
-                  print('Full Name: $fullName');
-                  print('Date of Birth: $dob');
-                  print('Gender: $gender');
-                  print('WhatsApp: $whatsapp');
-
-                 // Navigate to the Home screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Home()),
-                  );
-                },
-                child: const Text('Setuju dan Lanjutkan'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50), // Full width button
-                ),
-              ),
+              // Submit button
+              _buildSubmitButton(),
             ],
           ),
         ),
